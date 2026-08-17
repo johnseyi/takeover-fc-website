@@ -1,0 +1,227 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   TAKEOVER CREATIVES FC — DESIGN SYSTEM
+   Emerald Green · Pyramid Gold · Cream
+   Colours sampled from the club crest (#083018 green, #A88838 gold).
+   ========================================================================== */
+
+@theme {
+  /* --- Brand: Emerald Green --------------------------------------------- */
+  --color-pitch-950: #03130a;
+  --color-pitch-900: #061c0f;
+  --color-pitch-800: #08240f;
+  --color-emerald-900: #052a16;
+  --color-emerald-800: #083018; /* crest green */
+  --color-emerald-700: #0a4423;
+  --color-emerald-600: #0e6b36;
+  --color-emerald-500: #128a45;
+  --color-emerald-400: #1dbe63;
+  --color-emerald-300: #4ed98a;
+
+  /* --- Brand: Pyramid Gold ---------------------------------------------- */
+  --color-gold-800: #6b5318;
+  --color-gold-700: #8a6d24;
+  --color-gold-600: #a88838; /* crest gold */
+  --color-gold-500: #c9a227;
+  --color-gold-400: #e3c15c;
+  --color-gold-300: #f0d98c;
+
+  /* --- Brand: Cream + neutrals ------------------------------------------ */
+  --color-cream: #f7f2e6;
+  --color-cream-200: #ede5d2;
+  --color-cream-300: #ddd2b8;
+  --color-charcoal: #14161a;
+  --color-charcoal-light: #21252b;
+  --color-soft-grey: #8c9299;
+
+  /* --- Typography -------------------------------------------------------- */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-anton), var(--font-inter), ui-sans-serif, sans-serif;
+
+  /* --- Motion ------------------------------------------------------------ */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-pitch-950);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Accessible, brand-coloured focus ring on every interactive element. */
+  :focus-visible {
+    outline: 2px solid var(--color-gold-400);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-emerald-400);
+    color: var(--color-pitch-950);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ==========================================================================
+   DISPLAY TYPE — the football-editorial voice
+   ========================================================================== */
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+
+/* Small all-caps label used above section headings. */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   THE TAKEOVER LINE — signature component (master plan §59)
+   A thin emerald→gold line tracing player → team → community → club → future.
+   ========================================================================== */
+
+@utility takeover-line {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-emerald-600) 18%,
+    var(--color-emerald-400) 42%,
+    var(--color-gold-500) 68%,
+    var(--color-gold-300) 86%,
+    transparent 100%
+  );
+}
+
+@utility takeover-line-v {
+  background-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--color-emerald-500) 14%,
+    var(--color-emerald-400) 45%,
+    var(--color-gold-500) 75%,
+    transparent 100%
+  );
+}
+
+/* ==========================================================================
+   THE TAKEOVER GRID — signature component (master plan §59)
+   A faint modular grid that backs player cards, statistics and match blocks.
+   ========================================================================== */
+
+@utility takeover-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+@utility takeover-grid-dark {
+  background-image:
+    linear-gradient(to right, rgb(8 48 24 / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(8 48 24 / 0.08) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+/* ==========================================================================
+   SCROLL REVEALS (master plan §49) — opacity + a short rise, nothing more.
+   Fully disabled under prefers-reduced-motion.
+   ========================================================================== */
+
+@layer components {
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s var(--ease-out-expo),
+      transform 0.7s var(--ease-out-expo);
+    will-change: opacity, transform;
+  }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   MISC
+   ========================================================================== */
+
+/* Subtle downward invitation under the hero. */
+@keyframes scroll-hint {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(7px);
+    opacity: 1;
+  }
+}
+
+.animate-scroll-hint {
+  animation: scroll-hint 2.4s ease-in-out infinite;
+}
+
+/* Horizontal rails (timeline, galleries) without a visible scrollbar. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
