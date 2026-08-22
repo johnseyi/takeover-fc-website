@@ -19,7 +19,7 @@ export function SiteFooter() {
                 <Image
                   src="/logo.png"
                   alt=""
-                  width={64}
+                  width={51}
                   height={64}
                   className="h-14 w-auto"
                 />

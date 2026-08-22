@@ -42,7 +42,7 @@ export function PlayerAvatar({
       <Image
         src="/logo.png"
         alt=""
-        width={128}
+        width={101}
         height={128}
         className="h-20 w-auto opacity-70 sm:h-24"
       />

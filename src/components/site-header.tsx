@@ -77,7 +77,7 @@ export function SiteHeader() {
             <Image
               src="/logo.png"
               alt=""
-              width={44}
+              width={35}
               height={44}
               priority
               className="h-10 w-auto sm:h-11"

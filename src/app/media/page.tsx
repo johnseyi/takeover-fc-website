@@ -135,7 +135,7 @@ export default function MediaPage() {
                 <Image
                   src="/logo.png"
                   alt={`${site.name} club crest`}
-                  width={340}
+                  width={332}
                   height={420}
                   className="h-full w-auto object-contain"
                 />
