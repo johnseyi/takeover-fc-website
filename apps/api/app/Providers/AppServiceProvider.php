@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Observers\RevalidateObserver;
+
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Every content change pings the Next.js site to rebuild affected pages.
+        foreach (RevalidateObserver::observedModels() as $model) {
+            $model::observe(RevalidateObserver::class);
+        }
+
         //
     }
 }

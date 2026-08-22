@@ -9,6 +9,7 @@ use App\Filament\Resources\StaffMembers\Schemas\StaffMemberForm;
 use App\Filament\Resources\StaffMembers\Tables\StaffMembersTable;
 use App\Models\StaffMember;
 use BackedEnum;
+use App\Filament\Concerns\ManagedByContentStaff;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -16,9 +17,17 @@ use Filament\Tables\Table;
 
 class StaffMemberResource extends Resource
 {
+    use ManagedByContentStaff;
+
     protected static ?string $model = StaffMember::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'The Club';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = 'Leadership & Staff';
+    protected static ?string $pluralModelLabel = 'Leadership & Staff';
+    protected static ?string $modelLabel = 'Staff member';
 
     public static function form(Schema $schema): Schema
     {

@@ -9,6 +9,7 @@ use App\Filament\Resources\GalleryAlbums\Schemas\GalleryAlbumForm;
 use App\Filament\Resources\GalleryAlbums\Tables\GalleryAlbumsTable;
 use App\Models\GalleryAlbum;
 use BackedEnum;
+use App\Filament\Concerns\ManagedByMediaStaff;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -16,9 +17,17 @@ use Filament\Tables\Table;
 
 class GalleryAlbumResource extends Resource
 {
+    use ManagedByMediaStaff;
+
     protected static ?string $model = GalleryAlbum::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Media';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = 'Photo Albums';
+    protected static ?string $pluralModelLabel = 'Photo Albums';
+    protected static ?string $modelLabel = 'Album';
 
     public static function form(Schema $schema): Schema
     {

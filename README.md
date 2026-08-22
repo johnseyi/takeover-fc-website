@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/logo.png" alt="Takeover Creatives FC crest" width="120">
+  <img src="apps/web/public/logo.png" alt="Takeover Creatives FC crest" width="120">
   <h1>Takeover Creatives FC — Official Website</h1>
   <p><strong>Football With Purpose.</strong><br>
   Kampala, Uganda · Founded 2024 · Redefining Creativity Through Football</p>
@@ -15,12 +15,42 @@ Built to the club's Official Website Master Plan (`docs/`), which specifies the
 brand direction, content architecture, page structure and standards this site is
 measured against.
 
+## Repository
+
+A two-app monorepo:
+
+| App | What it is | Deploys to |
+|---|---|---|
+| `apps/web` | The public Next.js website | Vercel |
+| `apps/api` | Laravel 13 + Filament 5 content API and admin panel | Hostinger |
+
 ## Quick start
 
 ```bash
-npm install
-npm run dev            # http://localhost:3000
+# The website
+cd apps/web && npm install && npm run dev        # http://localhost:3000
+
+# The admin panel and API
+cd apps/api && composer install
+cp .env.example .env && php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed
+php artisan serve                                 # http://localhost:8000/admin
 ```
+
+Create an admin account:
+
+```bash
+cd apps/api && php artisan tinker --execute="
+App\Models\User::create([
+  'name' => 'Club Admin', 'email' => 'admin@takeoverfc.com',
+  'password' => 'password', 'role' => 'admin', 'is_active' => true,
+]);"
+```
+
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for putting both apps live.
+
+### `apps/web`
 
 | Script | What it does |
 |---|---|
@@ -29,7 +59,16 @@ npm run dev            # http://localhost:3000
 | `npm start` | Serve the production build |
 | `npm run lint` | ESLint, zero warnings tolerated |
 | `npm run typecheck` | TypeScript, no emit |
-| `npm run check:content` | **Lists every placeholder still to be replaced** |
+| `npm run check:content` | Lists any placeholder still in the static content files |
+
+### `apps/api`
+
+| Command | What it does |
+|---|---|
+| `php artisan serve` | Runs the API and admin panel |
+| `php artisan test` | Full test suite — panel rendering, roles, API shapes, revalidation |
+| `php artisan migrate --seed` | Builds the database and loads the club's documented content |
+| `php artisan db:seed --class=ClubSeeder` | Re-seeds content (safe to re-run) |
 
 ## Stack
 
@@ -40,8 +79,18 @@ npm run dev            # http://localhost:3000
 - No animation library: scroll reveals and counters are ~40 lines of
   `IntersectionObserver`, fully disabled under `prefers-reduced-motion`
 
-Static-first — 52 routes prerender at build time. Only the pages that depend on
-the current time (homepage, fixtures, teams) revalidate, hourly.
+Static-first — 53 routes prerender at build time. Only the pages that depend on
+the current time (homepage, fixtures, teams) revalidate on a timer; everything
+else rebuilds on demand when the admin panel says content changed.
+
+### Backend
+
+- **Laravel 13** with a read-only JSON API at `/api/v1`
+- **Filament 5** admin panel at `/admin`, branded in the club's colours
+- **Role-based access** (§65): admin, editor, media, viewer
+- **On-demand revalidation** — saving a result pings the site to rebuild only
+  the affected pages
+- Runs on MySQL in production, SQLite locally
 
 ## Pages
 
@@ -59,6 +108,26 @@ the current time (homepage, fixtures, teams) revalidate, hourly.
 | `/media` · `/gallery` · `/videos` | §41–43 |
 | `/join` · `/contact` | §44–45 |
 | `/privacy` · `/terms` | §9 footer |
+
+## The admin panel
+
+Lives at `/admin` on the backend and exists to satisfy §51: *"the club should not
+need a developer every time someone needs to update a match result."*
+
+| Group | Manages |
+|---|---|
+| **Football** | Fixtures & results, players, teams |
+| **Newsroom** | News articles |
+| **The Club** | Leadership & staff, partners |
+| **Media** | Photo albums, videos |
+| **Administration** | Panel users and roles |
+
+The match form is the one built with most care: entering a fixture is four
+fields, and the result, timeline, line-up, statistics and report sections stay
+hidden until the match is actually marked as played.
+
+Roles are enforced in code and covered by tests — a media user can publish news
+but cannot edit the squad or create panel users.
 
 ## Design system
 
@@ -102,50 +171,54 @@ players — but not a squad list, a fixture list, staff names or contact details
 Those sections are filled with **clearly-flagged placeholder data** so the design
 could be built and reviewed.
 
-```bash
-npm run check:content
-```
+The database seeder deliberately loads **only** the content the club can stand
+behind — the two documented players, the real teams, the real articles and the
+real photography. It does not seed the invented squad or fixtures the static
+site shipped with. Those go in through the panel, as real data.
 
-That prints every placeholder. At minimum, before launch:
+Before launch:
 
-1. **Replace or delete the 12 placeholder squad players** and the 9 staff roles
-   in `src/content/people.ts`.
-2. **Delete the 9 placeholder matches** in `src/content/matches.ts` — scores,
-   goalscorers, line-ups and statistics are all invented — and enter real ones.
-3. **Replace the placeholder contact details and social links** in
-   `src/content/site.ts`.
+1. **Enter the real squad and staff** in the admin panel. The nine staff roles
+   are seeded unpublished, so the panel shows exactly what needs filling in
+   without publishing placeholder people.
+2. **Enter real fixtures.** The site already handles an empty fixture list —
+   it shows "The next chapter is being built."
+3. **Replace the contact details and social links**, currently placeholders in
+   `apps/web/src/content/site.ts` and in the panel's settings.
 4. **Set `site.url`** to the real domain. It drives every canonical URL, sitemap
    entry and share card.
-5. **Delete or rewrite the placeholder match report** in `src/content/news.ts`.
-6. **Have the privacy policy and terms reviewed** against Uganda's Data
+5. **Have the privacy policy and terms reviewed** against Uganda's Data
    Protection and Privacy Act. Both pages carry a visible notice until then.
 
-`CONTENT.md` explains every content file and how to edit it.
+`apps/web/CONTENT.md` explains the static content files; anything already moved
+to the API is edited in the panel instead.
 
 ## Repository layout
 
 ```
-src/
-  app/          Routes (App Router), sitemap, robots, icons
-  components/   UI library — header, footer, cards, filters, reveals
-  content/      ALL site content. Edit here, not in components.
-  lib/          Types (§52 entity spec), SEO helpers, utilities
-public/images/  Web-ready photography (≤2400px)
-assets/raw/     Original camera files incl. RAW — git-ignored, back these up
-docs/           The Official Website Master Plan
-scripts/        Content placeholder audit
+apps/
+  web/                      Next.js site
+    src/app/                Routes, sitemap, robots, icons
+    src/components/         UI library
+    src/content/            Static content (being migrated to the API)
+    src/lib/                Types (§52 entity spec), SEO helpers
+    public/images/          Web-ready photography (≤2400px)
+  api/                      Laravel backend
+    app/Models/             §52 entities — Player, Fixture, Article, Partner…
+    app/Filament/           Admin panel resources, forms and tables
+    app/Http/               JSON API controller and resources
+    database/seeders/       ClubSeeder — the club's documented content
+    tests/Feature/          Panel, roles, API shapes, revalidation
+assets/raw/                 Original camera files incl. RAW — git-ignored
+docs/                       Master plan and DEPLOYMENT.md
 ```
 
 ## Deploying
 
-The site is a standard Next.js app and deploys to Vercel with no configuration.
-
-```bash
-npm run build && npm start   # verify the production build locally first
-```
-
-Remember to set `site.url` in `src/content/site.ts` to the production domain
-before the first deploy.
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — it covers the Hostinger hPanel
+specifics (keeping `.env` above the web root, cron for the scheduler and queue,
+PHP settings) and the one Vercel setting that matters: **Root Directory must be
+`apps/web`**, or the build fails.
 
 ---
 

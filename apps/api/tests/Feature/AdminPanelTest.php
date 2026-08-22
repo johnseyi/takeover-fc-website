@@ -2,6 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\Articles\ArticleResource;
+use App\Filament\Resources\GalleryAlbums\GalleryAlbumResource;
+use App\Filament\Resources\Players\PlayerResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -71,6 +75,41 @@ class AdminPanelTest extends TestCase
                 ->get($path)
                 ->assertOk("Failed rendering {$path}");
         }
+    }
+
+    /**
+     * Role gating (§65). A media user may publish news but must not be able to
+     * create panel users or edit the squad.
+     */
+    public function test_roles_restrict_what_each_user_can_manage(): void
+    {
+        $media = User::create([
+            'name' => 'Media Officer',
+            'email' => 'media@example.test',
+            'password' => 'password',
+            'role' => User::ROLE_MEDIA,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($media);
+
+        $this->assertTrue(ArticleResource::canCreate(), 'Media staff should manage news');
+        $this->assertTrue(GalleryAlbumResource::canCreate(), 'Media staff should manage albums');
+        $this->assertFalse(PlayerResource::canCreate(), 'Media staff should not edit the squad');
+        $this->assertFalse(UserResource::canViewAny(), 'Only admins manage panel users');
+
+        $viewer = User::create([
+            'name' => 'Viewer',
+            'email' => 'viewer@example.test',
+            'password' => 'password',
+            'role' => User::ROLE_VIEWER,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($viewer);
+
+        $this->assertTrue(ArticleResource::canViewAny(), 'Viewers may read');
+        $this->assertFalse(ArticleResource::canCreate(), 'Viewers may not write');
     }
 
     /** The match form is the screen the club will use most (§51). */

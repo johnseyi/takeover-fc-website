@@ -50,7 +50,7 @@ class FixtureForm
                             )),
 
                         ToggleButtons::make('home')
-                            ->label('Venue')
+                            ->label('Home or away')
                             ->boolean('Home', 'Away')
                             ->inline()
                             ->default(true)
@@ -67,6 +67,7 @@ class FixtureForm
                             )),
 
                         TextInput::make('venue')
+                            ->label('Ground')
                             ->required()
                             ->maxLength(180)
                             ->default('Namuwongo Community Ground, Kampala'),
@@ -89,6 +90,7 @@ class FixtureForm
                             ])
                             ->default('scheduled')
                             ->inline()
+                            ->grouped()
                             ->live()
                             ->required(),
 

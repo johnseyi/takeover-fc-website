@@ -35,4 +35,20 @@ return [
         ],
     ],
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Next.js frontend
+    |--------------------------------------------------------------------------
+    |
+    | Where to send on-demand revalidation requests when content changes, and
+    | the shared secret the frontend checks before acting on them.
+    |
+    */
+
+    'frontend' => [
+        'revalidate_url' => env('FRONTEND_REVALIDATE_URL'),
+        'revalidate_secret' => env('FRONTEND_REVALIDATE_SECRET'),
+    ],
+
 ];

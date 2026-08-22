@@ -9,6 +9,7 @@ use App\Filament\Resources\Players\Schemas\PlayerForm;
 use App\Filament\Resources\Players\Tables\PlayersTable;
 use App\Models\Player;
 use BackedEnum;
+use App\Filament\Concerns\ManagedByContentStaff;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -16,9 +17,14 @@ use Filament\Tables\Table;
 
 class PlayerResource extends Resource
 {
+    use ManagedByContentStaff;
+
     protected static ?string $model = Player::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Football';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {
